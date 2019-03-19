@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Document</title>
+        <style>
+            body {
+                font-size: 1.2em;
+            }
+            .header {
+                min-height: 100px;
+                display: flex;
+                justify-content: center;
+            }
+            .add-todo {
+                height: 20px;
+                border: none;
+                outline: none;
+                border-bottom: 1px solid salmon;
+                width: 250px;
+            }
+
+            ul {
+                list-style-type: none;
+            }
+
+            .dropdown-button {
+                padding-right: 15px;
+            }
+            .edit-btn, .delete-btn {
+                margin-left: 85px;
+            }
+
+            #editInput {
+                display: none;
+            }
+        </style>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    </head>
+    <body>
+        <header class="header">
+            <input class="add-todo" type="text" />
+        </header>
+        <main class="main">
+            <ul class="list-notes"></ul>
+            <input type="text" id="editInput">
+        </main>
+        <script src="app.js"></script>
+    </body>
+</html>
