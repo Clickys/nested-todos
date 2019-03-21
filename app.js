@@ -41,3 +41,41 @@ const app = {
         }
     },
 };
+const ulFirstList = document.querySelector( '.list-notes' );
+const view = {
+    render( notesArray ) {
+        ulFirstList.innerHTML = '';
+        for ( let i = 0; i < notesArray.length; i++ ) {
+            if ( notesArray[ i ].nestedNotes.length ) {
+                const ulElement = document.createElement( 'ul' );
+                render( notesArray[ i ] );
+            } else {
+                const liElement = document.createElement( 'li' );
+                liElement.textContent = notesArray[ i ].userNote;
+                liElement.dataset.id = notesArray[ i ].id;
+                liElement.classList.add( 'list-item' );
+                liElement.innerHTML += '<input  type="text" id="add-nested-note">';
+                ulFirstList.appendChild( liElement );
+            }
+        }
+    },
+};
+
+const controller = {
+    init() {
+        document.querySelector( '.add-todo' ).addEventListener( 'keyup', this.create.bind( this ) );
+    },
+
+    create( e ) {
+        const userInput = e.target.value;
+
+        if ( e.keyCode === 13 && userInput ) {
+            app.addNote( app.notes, userInput );
+            e.target.value = '';
+            e.target.focus();
+            view.render( app.notes );
+        }
+    },
+};
+
+controller.init();
