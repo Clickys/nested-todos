@@ -29,16 +29,37 @@
             .dropdown-button {
                 padding-right: 15px;
             }
-            .edit-btn, .delete-btn {
-                margin-left: 85px;
+            .note-edit-input {
+                display: none;
+                position: relative;
+                top: -20px;
+                left: 0;
+                border: none;
+                outline: 0;
+                border-bottom: 1px solid salmon;
             }
 
-            .editInput {
+            .delete-btn {
+                border: 0;
+                background-color: red;
+                font-weight: 600;
+                margin-left: 150px;
+                height: 10px;
+                width: 10px;
+
+            }
+            .add-nested-note {
+                height: 10px;
+                width: 10px;
+                background-color: green;
+                border: none;
+                outline: 0;
+                margin-left: 5px;
+            }
+            .nested-note-input {
                 display: none;
             }
-            .nestedTodo {
-                display: none;
-            }
+
         </style>
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
     </head>
@@ -47,6 +68,7 @@
             <input class="add-todo" type="text" />
         </header>
         <main class="main">
+            <input class="nested-note-input" type="text"></input>
             <ul class="list-notes"></ul>
         </main>
         <script src="app.js"></script>

@@ -38,5 +38,6 @@ module.exports = {
 
         // keep it simple
         complexity: [1, 5],
+        "prefer-destructuring": ["error", {"object": false, "array": false}]
     },
 };
