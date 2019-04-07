@@ -1,6 +1,10 @@
 /* eslint-disable object-curly-spacing */
 /* eslint-disable no-debugger */
 /* eslint-disable no-plusplus */
+/*
+ Check app.remove function for nestedTodos
+ Check app.edit function for nestedTodos
+*/
 const app = {
     notes: [],
     generateUniqueID() {
@@ -12,120 +16,222 @@ const app = {
             .substr( 2, 9 ) }`;
     },
 
-    addNote( whereToAddNote, userNote ) {
-        whereToAddNote.push( {
-            userNote,
+    addTodo( todoText , arrayToAdd = app.notes) {
+        let newNoteObject = {
+            todoText,
             id: this.generateUniqueID(),
-            nestedNotes: [],
+            completed: false,
+            nestedTodos: []
+        };
+
+        arrayToAdd.push( newNoteObject  );
+        return newNoteObject;
+    },
+
+    editTodo( noteIDtoEdit, newTodoText ) {
+        const noteToEdit = this.notes.find( note => note.id === noteIDtoEdit );
+        noteToEdit.todoText = newTodoText;
+    },
+
+    toggleTodo( noteIDToToggle ) {
+        this.notes.forEach( ( note ) => {
+            if ( note.id === noteIDToToggle ) {
+                note.completed = !note.completed;
+            }
         } );
     },
 
-    editNote( arrayToCheck, noteIdToEdit, newNote ) {
-        for ( let i = 0; i < arrayToCheck.length; i++ ) {
-            if ( arrayToCheck[ i ].nestedNotes.length ) {
-                this.editNote( arrayToCheck[ i ].nestedNotes, noteIdToEdit, newNote );
-            } else if ( arrayToCheck[ i ].id === noteIdToEdit ) {
-                arrayToCheck[ i ].userNote = newNote;
-                break;
+    removeTodo(noteIDToDestroy, array = app.notes) {
+        array.forEach( ( note, i ) => {
+            if ( note.id === noteIDToDestroy ) {
+               array.splice(i, 1);
+            }
+        } );
+    },
+    addNested(noteID, todoText) {
+        let arrayToSearch = this.arrayToSearch(noteID);
+        let noteObjectToAdd = arrayToSearch.find( (note) => {
+            return note.id === noteID;
+        } )
+        app.addTodo(todoText, noteObjectToAdd.nestedTodos);
+        return noteObjectToAdd.nestedTodos;
+    },
+    arrayToSearch(noteID, array = app.notes) {
+        let returnedArray;
+        // Base Case
+        if (!array.length) {
+            return;
+        }
+        // Recursive Case
+        for (let i = 0; i < array.length; i++) {
+            if (array[i].nestedTodos.length) {
+                returnedArray = this.arrayToSearch(noteID, array[i].nestedTodos);
+            }
+            if (noteID === array[i].id) {
+                return array;
             }
         }
-    },
-
-    deleteNote( arrayToCheck, noteIdToEdit ) {
-        for ( let i = 0; i < arrayToCheck.length; i++ ) {
-            if ( arrayToCheck[ i ].nestedNotes.length ) {
-                this.deleteNote( arrayToCheck[ i ].nestedNotes, noteIdToEdit );
-            } else if ( arrayToCheck[ i ].id === noteIdToEdit ) {
-                arrayToCheck.splice( i, 1 );
-                break;
-            }
-        }
-    },
-    findNote( id ) {
-        for ( let i = 0; i < this.notes.length; i++ ) {
-            if ( this.notes[ i ].nestedNotes.length ) {
-                this.findNote( this.notes[ i ].nestedNotes );
-            } else if ( this.notes[ i ].id === id ) {
-                return this.notes[ i ];
-            }
-        }
-    },
+        return returnedArray;
+    }
 };
-const ulFirstList = document.querySelector( '.list-notes' );
+
 const view = {
-    render( notesArray ) {
-        ulFirstList.innerHTML = '';
-        for ( let i = 0; i < notesArray.length; i++ ) {
-            if ( notesArray[ i ].nestedNotes.length ) {
-                const ulElement = document.createElement( 'ul' );
-                this.render( notesArray[ i ] );
-            } else {
-                const liElement = document.createElement( 'li' );
-                liElement.textContent = `${ notesArray[ i ].userNote }`;
-                liElement.innerHTML += '<button class="delete-btn"></button>';
-                liElement.innerHTML += '<button class="add-nested-note"></button>';
-                liElement.dataset.id = notesArray[ i ].id;
-                liElement.classList.add( 'list-item' );
-                liElement.innerHTML += '<input  type="text" class="note-edit-input">';
-                ulFirstList.appendChild( liElement );
-            }
+    render(newNoteObject) {
+        let todos = app.notes;
+        const userInput = document.querySelector('.add-todo').value.trim();
+        let elementPosition = document.querySelector( '.note-list' );
+        // let compiledTemplate = Handlebars.compile(noteTemplate);
+        if (!todos.length) {
+            elementPosition.innerHTML = '';
+            return;
         }
+        elementPosition.innerHTML += `<li class="entry" data-id=${newNoteObject.id} data-completed=${newNoteObject.completed}>
+            <input class="toggle" type="checkbox">${newNoteObject.todoText}
+            <input type="text" class="edit-note" value=${newNoteObject.todoText}>
+            <input type="text" class="add-nested-note">
+            <button class="destroy">Delete</button>
+            <button class="add-nested-todo-btn">Add todo</button>
+            <ul>
+            </ul>
+        </li>`
+        // elementPosition.innerHTML = compiledTemplate(todos);
+        document.querySelector('.add-todo').value = '';
+        document.querySelector('.add-todo').focus();
+    },
+    renderNestedTodos(arrayToRender, whereToAdd) {
+        let nestedTemplate = document.querySelector( '#nestedTemplate' ).innerHTML;
+        let compiledTemplate = Handlebars.compile(nestedTemplate);
+        let ulToAdd = whereToAdd.querySelector('ul');
+        ulToAdd.innerHTML = compiledTemplate(arrayToRender);
+
     },
 };
-
+let noteTemplate = document.querySelector( '#entry-template' ).innerHTML;
 const controller = {
-    init() {
-        document.querySelector( '.add-todo' ).addEventListener( 'keyup', this.create.bind( this ) );
-        document.querySelector( '.list-notes' ).addEventListener( 'dblclick', ( e ) => {
-            if ( e.target.closest( '.list-item' ) ) {
-                console.log( e.target.children );
-                e.target.children[ 2 ].style.display = 'block';
-                const oldValue = e.target.innerText;
-                e.target.children[ 2 ].value = oldValue;
-            }
-        } );
-        document.querySelector( '.list-notes' ).addEventListener( 'keyup', ( e ) => {
-            if ( e.target.closest( '.note-edit-input' ) ) {
-                if ( e.keyCode === 13 ) {
-                    this.editNote( e );
-                }
-            }
-        } );
-        document.querySelector( '.list-notes' ).addEventListener( 'click', ( e ) => {
-            if ( e.target.closest( '.delete-btn' ) ) {
-                const parentID = e.target.parentElement.dataset.id;
-                app.deleteNote( app.notes, parentID );
-                view.render( app.notes );
-            }
-        } );
 
-        document.querySelector( '.list-notes' ).addEventListener( 'keyup', ( e ) => {
-            if ( e.target.closest( '.add-nested-note' ) ) {
-                if ( e.keyCode === 13 ) {
-                    this.addNestedNote( e );
-                }
+    init() {
+        document.querySelector( '.add-todo' ).addEventListener( 'keyup', ( e ) => {
+            if ( e.keyCode === 13 ) {
+                this.create( e );
             }
         } );
+        document.querySelector('.note-list').addEventListener('change', (e) => {
+            if(e.target.className === 'toggle') {
+                this.toggle(e);
+            }
+        });
+        document.querySelector('.note-list').addEventListener('click', (e) => {
+            if(e.target.className === 'destroy') {
+                this.destroy(e);
+            }
+
+        })
+        document.querySelector('.note-list').addEventListener('dblclick', (e) => {
+            if (e.target.className === 'entry') {
+                this.editTodo(e);
+            }
+        })
+        document.querySelector('.note-list').addEventListener('keyup', (e) => {
+            if (e.target.classList[0] === 'edit-note') {
+                this.updateNote(e);
+            }
+        })
+        document.querySelector('.note-list').addEventListener('focusout', (e) => {
+            if (e.target.classList[0] === 'edit-note') {
+                document.querySelector('.edit-note').classList.remove('show-edit');
+                document.querySelector('.edit-note').classList.add('hide-edit');
+            }
+        })
+        document.querySelector('.note-list').addEventListener('click', (e) => {
+            if (e.target.className === 'add-nested-todo-btn') {
+                this.showNested(e);
+            }
+        })
+        document.querySelector('.note-list').addEventListener('focusout', (e) => {
+            if (e.target.classList[0] === 'add-nested-note') {
+                this.hideNested(e);
+            }
+        })
+
+        document.querySelector('.note-list').addEventListener('keyup', (e) => {
+
+            if (e.target.classList[0] === 'add-nested-note') {
+                this.addNested(e);
+            }
+        })
     },
 
     create( e ) {
-        const userInput = e.target.value;
+        let todos = app.notes;
+        const userInput = document.querySelector('.add-todo').value.trim();
+        if (userInput === '') {
+            return;
+        }
+        let newNoteObject = app.addTodo( userInput );
+        view.render(newNoteObject);
 
-        if ( e.keyCode === 13 && userInput ) {
-            app.addNote( app.notes, userInput );
-            e.target.value = '';
-            e.target.focus();
-            view.render( app.notes );
+    },
+
+    toggle(e) {
+        let parentElement = e.target.parentElement;
+        let parentElementID = parentElement.dataset.id;
+        let isCompleted = parentElement.dataset.completed;
+
+        if (isCompleted === 'true' ) {
+            e.target.parentElement.dataset.completed = 'false';
+        } else {
+            e.target.parentElement.dataset.completed = 'true';
+        }
+        app.toggleTodo(parentElementID);
+    },
+
+    destroy(e) {
+        let arrayToDelete = app.arrayToSearch(e.target.parentElement.dataset.id);
+        app.removeTodo(e.target.parentElement.dataset.id, arrayToDelete);
+        let currentElement = e.target.parentElement;
+        e.target.parentElement.parentElement.removeChild(currentElement)
+    },
+
+    editTodo(e) {
+        document.querySelector('.edit-note').classList.add('show-edit');
+        document.querySelector('.edit-note').classList.remove('hide-edit');
+        let editNoteInput = document.querySelector('.show-edit');
+        editNoteInput.focus();
+    },
+
+    updateNote(e) {
+        let noteID = e.target.parentElement.dataset.id;
+        if (e.keyCode === 13 && e.target.value) {
+            app.editTodo(noteID, e.target.value);
+            view.render();
+            e.target.classList.toggle('show-nested');
         }
     },
 
-    editNote( e ) {
-        const listItemID = e.target.parentElement.dataset.id;
-        const newValue = e.target.value;
-        app.editNote( app.notes, listItemID, newValue );
-        view.render( app.notes );
+    showNested(e) {
+        let inputNested = e.target.parentElement.children[2];
+        inputNested.value = '';
+        inputNested.classList.toggle('show-nested');
+        inputNested.focus();
     },
 
+    hideNested(e) {
+        let inputNested = e.target.parentElement.children[2];
+        inputNested.value = '';
+        inputNested.classList.remove('show-nested');
+
+    },
+
+    addNested(e) {
+        let noteID = e.target.parentElement.dataset.id;
+        let whereToAdd = e.target.parentElement;
+        if (e.keyCode === 13 && e.target.value) {
+            let userInput = e.target.value;
+            let arrayToAddNested = app.addNested(noteID, userInput);
+            view.renderNestedTodos(arrayToAddNested, whereToAdd, e.target.value);
+            this.hideNested(e);
+        }
+    }
 };
 
 controller.init();

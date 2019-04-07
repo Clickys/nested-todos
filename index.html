@@ -5,6 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta http-equiv="X-UA-Compatible" content="ie=edge" />
         <title>Document</title>
+        <link
+            rel="stylesheet"
+            href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+            integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr"
+            crossorigin="anonymous"
+        />
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
         <style>
             body {
                 font-size: 1.2em;
@@ -25,52 +32,121 @@
             ul {
                 list-style-type: none;
             }
-
-            .dropdown-button {
-                padding-right: 15px;
-            }
-            .note-edit-input {
-                display: none;
+            .note-list {
                 position: relative;
-                top: -20px;
-                left: 0;
-                border: none;
+            }
+            .note-list li {
+                margin: 2px 0;
+                position: relative;
+            }
+            .note-list li .destroy {
+                background-color:transparent;
+                border: 0;
                 outline: 0;
-                border-bottom: 1px solid salmon;
+                background-color: teal;
+                padding: 10px;
+                color: white;
+                font-weight: 600;
+                cursor: pointer;
+            }
+            [data-completed="true"] {
+                text-decoration: line-through;
+            }
+            [data-completed="false"] {
+                text-decoration: none;
+            }
+            .entry {
+                position: relative;
+            }
+            .edit-note {
+                display: none;
+                position: absolute;
+            }
+            .show-edit {
+                display: block;
+                padding: 10px;
+                top: 0;
+
+            }
+            .hide-edit {
+                display: none;
+                bottom: 0;
             }
 
-            .delete-btn {
+            .add-nested-todo-btn {
+                background-color:transparent;
                 border: 0;
-                background-color: red;
+                outline: 0;
+                background-color: teal;
+                padding: 10px;
+                color: white;
                 font-weight: 600;
-                margin-left: 150px;
-                height: 10px;
-                width: 10px;
-
+                cursor: pointer;
             }
             .add-nested-note {
-                height: 10px;
-                width: 10px;
-                background-color: green;
-                border: none;
-                outline: 0;
-                margin-left: 5px;
-            }
-            .nested-note-input {
                 display: none;
             }
+            .show-nested {
+                display: block;
+                position: absolute;
+                padding: 15px;
+                left: 0;
+                top: 0;
 
+            }
         </style>
-        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+
     </head>
     <body>
+        <script id="entry-template" type="text/x-handlebars-template">
+            {{#this}}
+                <li class="entry" data-id="{{id}}"
+                {{#if completed}}
+                    data-completed="true"
+                {{else}}
+                    data-completed="false"
+                {{/if}}>
+                <input class="toggle" type="checkbox" {{#if completed}}checked{{/if}}>
+                    {{todoText}}
+                <input type="text" class="edit-note" value="{{todoText}}">
+                <input type="text" class="add-nested-note" value="">
+                <button class="destroy">Delete</button>
+                <button class="add-nested-todo-btn">Add Todo</button>
+                <ul>
+
+                </ul>
+                </li>
+            {{/this}}
+        </script>
+        <script id="nestedTemplate" type="text/x-handlebars-template">
+            {{#this}}
+                <li class="entry" data-id="{{id}}"
+                {{#if completed}}
+                    data-completed="true"
+                {{else}}
+                    data-completed="false"
+                {{/if}}>
+                <input class="toggle" type="checkbox" {{#if completed}}checked{{/if}}>
+                    {{todoText}}
+                <input type="text" class="edit-note" value="{{todoText}}">
+                <input type="text" class="add-nested-note" value="">
+                <button class="destroy">Delete</button>
+                <button class="add-nested-todo-btn">Add Todo</button>
+                <ul>
+
+                </ul>
+                </li>
+            {{/this}}
+        </script>
         <header class="header">
             <input class="add-todo" type="text" />
         </header>
         <main class="main">
-            <input class="nested-note-input" type="text"></input>
-            <ul class="list-notes"></ul>
+            <ul class="note-list">
+
+            </ul>
         </main>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.1.1/handlebars.js"></script>
         <script src="app.js"></script>
     </body>
 </html>
